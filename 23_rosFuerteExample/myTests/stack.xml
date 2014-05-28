@@ -1,0 +1,9 @@
+<stack>
+  <description brief="myTests">myTests</description>
+  <author>Maintained by andreu</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/myTests</url>
+  <depend stack="ros" />
+
+</stack>

@@ -1,0 +1,132 @@
+*************************** 64 bit machine **********************************
+
+Difference between analytic derivative and numerical approximation of derivative: 1.30404e-05
+Find the minimum of the rosen function()
+rosen solution:
+      1 
+1.00001 
+
+rosen solution:
+0.999984 
+0.999969 
+
+iteration: 0   objective: 43.6
+iteration: 1   objective: 1.4606
+iteration: 2   objective: 0.190265
+iteration: 3   objective: 0.0044029
+iteration: 4   objective: 0.00391334
+iteration: 5   objective: 0.00390762
+iteration: 6   objective: 0.00385998
+iteration: 7   objective: 0.00375886
+iteration: 8   objective: 0.00347949
+iteration: 9   objective: 0.00278212
+iteration: 10   objective: 0.000956685
+iteration: 11   objective: 0.000110083
+iteration: 12   objective: 6.4738e-05
+iteration: 13   objective: 2.09611e-06
+iteration: 14   objective: 8.90855e-09
+iteration: 15   objective: 3.5963e-12
+
+rosen solution: 
+1 
+1 
+
+rosen solution: 
+1 
+1 
+
+rosen solution: 
+1 
+1 
+
+rosen solution: 
+1 
+1 
+
+
+Find the minimum of the test_function
+test_function solution:
+3 
+5 
+1 
+7 
+
+test_function solution:
+      3 
+      5 
+1.00001 
+      7 
+
+test_function solution:
+3 
+5 
+1 
+7 
+
+
+*************************** 32 bit machine **********************************
+
+Difference between analytic derivative and numerical approximation of derivative: 1.86171e-05
+Find the minimum of the rosen function()
+rosen solution:
+      1
+1.00001
+
+rosen solution:
+1
+1
+
+iteration: 0   objective: 43.6
+iteration: 1   objective: 1.4606
+iteration: 2   objective: 0.190265
+iteration: 3   objective: 0.0044029
+iteration: 4   objective: 0.00391334
+iteration: 5   objective: 0.00390762
+iteration: 6   objective: 0.00385998
+iteration: 7   objective: 0.00375886
+iteration: 8   objective: 0.00347949
+iteration: 9   objective: 0.00278212
+iteration: 10   objective: 0.000956685
+iteration: 11   objective: 0.000110083
+iteration: 12   objective: 6.4738e-05
+iteration: 13   objective: 2.09611e-06
+iteration: 14   objective: 8.90855e-09
+iteration: 15   objective: 3.5963e-12
+
+rosen solution:
+1
+1
+
+rosen solution:
+0.999987
+0.999975
+
+rosen solution:
+1
+1
+
+rosen solution:
+1
+1
+
+
+Find the minimum of the test_function
+test_function solution:
+3
+5
+1
+7
+
+test_function solution:
+      3
+      5
+1.00001
+      7
+
+test_function solution:
+3
+5
+1
+7
+
+

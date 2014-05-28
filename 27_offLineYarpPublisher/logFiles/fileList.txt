@@ -1,0 +1,3 @@
+../logFiles/file_0.txt /offLine/portAA
+../logFiles/file_1.txt /offLine/portB
+
