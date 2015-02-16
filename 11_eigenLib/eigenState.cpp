@@ -1,5 +1,6 @@
 #include <iostream>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 
 // import most common Eigen types 
 using namespace std;

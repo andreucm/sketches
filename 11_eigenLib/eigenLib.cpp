@@ -1,12 +1,14 @@
 /**helloWorld.cpp*/
 
+//Std 
 #include <iostream>
-#include <Eigen/Core>
-#include <Eigen/LU>
-#include <Eigen/Geometry>
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
+
+//eigen
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 
 // import most common Eigen types 
 using namespace std;
@@ -30,7 +32,7 @@ int main(int, char *[])
 	cout << "m3(1,2) = " << m3(1,2) << endl;
 	cout << "v4(0) = " << v4(0) << " = " << v4[0] << " = " << v4.x() << endl;
 	cout << "v4(3) = " << v4(3) << " = " << v4[3] << " = " << v4.w() << endl;
-	cout << "m3(1,:) = " << m3.block<1,3>(1,0) << endl;
+	cout << "m3(1,:) = " << m3.block<1,3>(1,0) << " = "<< m3.block(1,0,1,3) << endl;
 	cout << "m3(:,1) = \n" << m3.block<3,1>(0,1) << endl;
 	
 	//operations
