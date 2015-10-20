@@ -73,6 +73,14 @@ int main()
       double ang = atan2( 0 , -1 );
       std::cout << "ang: " << ang << std::endl;
       
+      //shifting
+      unsigned char vc[4];
+      vc[0] = 0xa0; vc[1] = 0xb1; vc[2] = 0xc2; vc[3] = 0xd3;  
+      unsigned int ui; 
+      ui = vc[3] << 24 | vc[2] << 16 | vc[1] << 8 | vc[0];
+      cout << hex << ui << dec << endl;
+      
+      
 	return 0;
 }
 
