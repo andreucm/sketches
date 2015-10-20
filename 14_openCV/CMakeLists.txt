@@ -11,9 +11,12 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIR})
 ADD_EXECUTABLE(matMainOpenCV2 matMainOpenCV2.cpp)
 ADD_EXECUTABLE(histogramsMain histogramsMain.cpp)
 ADD_EXECUTABLE(histogramCalc histogramCalc.cpp)
+ADD_EXECUTABLE(webcam_capture webcam_capture.cpp)
+
 
 #Link libraries
 # TARGET_LINK_LIBRARIES(hwOpenCv ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(matMainOpenCV2 ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(histogramsMain ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(histogramCalc ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(webcam_capture ${OpenCV_LIBS})
