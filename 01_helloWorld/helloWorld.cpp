@@ -64,6 +64,9 @@ int main()
 	status |=i2;
 	if ( (status & i2) )cout << "2. this appears if (status&i2) >0" << endl;	
 	
+	unsigned long ul_; 
+	cout << "size of unsigned long: " << sizeof(ul_) << endl; 
+	
 	
 	cout<<dec;
 	
