@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     double t1, t2;
     MatrixXi bigMatrix, bigMatrixResult;
     int mSize = 1500;
+    MatrixXd md; 
     
     //get user input
     int user_choice = atoi(argv[1]);
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
             mp3 = new Matrix3f();
             *mp3 << 11, 22, -33, 44, -55, 66, -77, 88, 99;
             cout << "(*mp3)(0,0)=" << (*mp3)(0,0) << endl;
+            uu = vv+3*Vector3f::Ones(); 
             break;
             
         case 3:
@@ -102,6 +104,11 @@ int main(int argc, char *argv[])
             t2 = (double)(ts.tv_sec + ts.tv_usec/1e6);  
             cout << "Time for matrix product: " << t2-t1 << endl;
             break;
+            
+        case 4: 
+            md.setZero(1,3);
+            cout << md << endl;
+            break; 
 
         default:
             std::cout << std::endl << "Unknown Test Id. EXIT" << std::endl;
