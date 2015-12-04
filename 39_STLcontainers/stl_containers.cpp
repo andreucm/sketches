@@ -100,6 +100,7 @@ class classA
 
 int main()
 {
+	/*
       //containers
       vector<classA> vectA;
       list<classA> list1, list2;
@@ -306,12 +307,24 @@ cout << endl << "7. Things We can do with a list" << endl;
       list1.splice(list1.begin(),list2);
       crono.stopAndPrint("dT(7.2) = ");
       cout << "    First element is : " << list1.front().getValue() << endl;
-      
+      */
+cout << endl << "8. init a vector from a pointer" << endl;                  
+		unsigned char buf[100];
+		for (int ii = 0; ii<100; ii++) buf[ii] = (unsigned char)ii;
+		
+		vector<unsigned char> vec(&buf[50], &buf[60]);
+// 		vec.data() = buf; 
+		
+		for (int ii = 0; ii<vec.size(); ii++) cout << (unsigned int)vec.at(ii) << ",";
+		cout << endl; 
+		
+		cout << vec; 
+
       
 cout << endl << "The end " << endl;
       cout << "  clear all" << endl << endl;
-      vectA.clear();
-      list1.clear();
-      logFile.close();
+//       vectA.clear();
+//       list1.clear();
+//       logFile.close();
       return 0;
 }
