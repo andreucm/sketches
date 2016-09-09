@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 project(ceres_sketches)
 
 #settings
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../lib)
 
 #to activate c++11
 include(CheckCXXCompilerFlag)
@@ -24,6 +24,8 @@ include_directories(${CERES_INCLUDE_DIRS})
 
 # Build
 add_executable(main_jet src/main_jet.cpp)
+add_executable(hello_ceres src/hello_ceres.cpp)
 
 # Link
 target_link_libraries(main_jet ${CERES_LIBRARIES})
+target_link_libraries(hello_ceres ${CERES_LIBRARIES})
