@@ -64,6 +64,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <unistd.h>
 /***********************************/
 
 /* draw a triangle with vertices at (x1, y1), (x2, y2) 
@@ -237,7 +238,7 @@ int main(int argc, char** argv)
    glutCreateWindow (argv[0]);
    init();
    display();
-   sleep(3);
+   usleep(1000000); //1 second
    //glutDisplayFunc(display);
    //glutKeyboardFunc(keyboard);
    //glutMainLoop();

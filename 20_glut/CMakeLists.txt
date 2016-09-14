@@ -1,7 +1,16 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
+
+#find OPenGL and GLUT
+FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(GLUT REQUIRED)
+
+#add include directories for OpenGL and GLUT 
+INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIRS})
 
 #Builds up all
 ADD_EXECUTABLE(myGlut openGLglut.cpp)
 
 #Link libraries
-TARGET_LINK_LIBRARIES(myGlut glut GLU)
+# TARGET_LINK_LIBRARIES(myGlut glut GLU)
+TARGET_LINK_LIBRARIES(myGlut ${OPENGL_LIBRARIES} ${GLUT_glut_LIBRARY})
