@@ -25,7 +25,9 @@ include_directories(${CERES_INCLUDE_DIRS})
 # Build
 add_executable(main_jet src/main_jet.cpp)
 add_executable(hello_ceres src/hello_ceres.cpp)
+add_executable(sphere_fitting src/sphere_fitting.cpp)
 
 # Link
 target_link_libraries(main_jet ${CERES_LIBRARIES})
 target_link_libraries(hello_ceres ${CERES_LIBRARIES})
+target_link_libraries(sphere_fitting ${CERES_LIBRARIES})

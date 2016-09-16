@@ -28,9 +28,10 @@ struct MyCostFunctor
 int main(int argc, char** argv) 
 {
 
-    //program arguments. Num points, center of the sphere and radius
+    //user arguments. Num points, center of the sphere and radius
     unsigned int np = 100; 
-    Eigen::Vector3d center << 5,-6,7; 
+    Eigen::Vector3d center; 
+    center  << 5,-6,7; 
     double radius = 3.7; 
     double noise_stddev = 0.2; 
     double outlier_ratio = 0.1; 
@@ -72,9 +73,9 @@ int main(int argc, char** argv)
     //create outliers
     for (unsigned int ii=0; ii<np; ii++)
     {
-        if ( rnd_uniform(rnd_gen) < outlier_ratio )
+        if ( rnd_uniform(rnd_gen) < outlier_ratio ) //outlier case
         {
-            //
+            points.block<3,1>(0,ii) << points.block<3,1>(0,ii)*0.5*rnd_uniform(rnd_gen); 
         }
     }
     
@@ -88,8 +89,8 @@ int main(int argc, char** argv)
     //solve: estimate sphere parameters
 
     //print results
-    std::cout << summary.BriefReport() << "\n";
-    std::cout << "x : " << initial_x << " -> " << x << "\n";
+    //std::cout << summary.BriefReport() << "\n";
+    //std::cout << "x : " << initial_x << " -> " << x << "\n";
     
     //exit
     return 0;
