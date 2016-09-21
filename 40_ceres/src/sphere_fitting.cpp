@@ -14,14 +14,34 @@
 
 
 
-//struct definig a cost function as a templated const operator ()
-struct MyCostFunctor 
+//class holding a point measurement and definig a cost function as a templated const operator ()
+class SphereConstraint
 {
-    template <typename T> bool operator()(const T* const x, T* residual) const 
-    {
-        residual[0] = T(10.0) - x[0];
-        return true;
-    }
+    private:
+        //point measurement
+        Eigen::Vector3d point_; 
+    
+    public: 
+        SphereConstraint(const Eigen::Vector3d & _point) :
+            point_(_point)
+        {
+            
+        }
+        
+        ~SphereConstraint()
+        {
+            //
+        }
+        
+        template <typename T> bool operator()(const T* const x, T* residual) const 
+        {
+            //sphere equation (x-cx)^2+(y-cy)^2+(z-cz)^2 = R^2
+            residual[0] = (T(point_.x())-x[0])*(T(point_.x())-x[0]) +
+                          (T(point_.y())-x[1])*(T(point_.y())-x[1]) +
+                          (T(point_.z())-x[2])*(T(point_.z())-x[2]) -
+                          - x[3]*x[3];
+            return true;
+        }
 };
 
 //main 
@@ -35,12 +55,13 @@ int main(int argc, char** argv)
     double radius = 3.7; 
     double noise_stddev = 0.2; 
     double outlier_ratio = 0.1; 
+    Eigen::Vector4d initial_guess; 
+    initial_guess << 0,0,0,0; //center x,y,z and radius
+    
     
     //required inits for ceres
     google::InitGoogleLogging(argv[0]);
 
-    // Declare the ceres problem.
-    ceres::Problem problem;
 
 //************** GERNERATE MEASUREMENTS *************************
     
@@ -84,13 +105,28 @@ int main(int argc, char** argv)
 
 //*************** CERES PROBLEM *********************************
 
-    //create measurements and add constraints to the problem
+    // Declare the ceres problem.
+    ceres::Problem problem;
 
+    //Add constraints to the problem
+    for (unsigned int ii=0; ii<np; ii++)
+    {
+        problem.AddResidualBlock( new ceres::AutoDiffCostFunction<SphereConstraint, 1, 4>( 
+                                                    new SphereConstraint(points.block<3,1>(0,ii)) ),
+                                                    NULL, initial_guess.data() );    
+    }
+    
     //solve: estimate sphere parameters
+    ceres::Solver::Options options;
+    options.max_num_iterations = 25;
+    options.linear_solver_type = ceres::DENSE_QR;
+    options.minimizer_progress_to_stdout = true;
+    ceres::Solver::Summary summary;
+    Solve(options, &problem, &summary);    
 
     //print results
-    //std::cout << summary.BriefReport() << "\n";
-    //std::cout << "x : " << initial_x << " -> " << x << "\n";
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "x-opt : " << initial_guess.transpose() << std::endl;
     
     //exit
     return 0;
