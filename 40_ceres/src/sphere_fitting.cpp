@@ -39,7 +39,7 @@ class SphereConstraint
             residual[0] = (T(point_.x())-x[0])*(T(point_.x())-x[0]) +
                           (T(point_.y())-x[1])*(T(point_.y())-x[1]) +
                           (T(point_.z())-x[2])*(T(point_.z())-x[2]) -
-                          - x[3]*x[3];
+                          x[3]*x[3];
             return true;
         }
 };
@@ -49,15 +49,17 @@ int main(int argc, char** argv)
 {
 
     //user arguments. Num points, center of the sphere and radius
-    unsigned int np = 100; 
+    unsigned int np = 500; 
     Eigen::Vector3d center; 
     center  << 5,-6,7; 
     double radius = 3.7; 
     double noise_stddev = 0.2; 
-    double outlier_ratio = 0.1; 
+    double outlier_ratio = 0.05; 
     Eigen::Vector4d initial_guess; 
-    initial_guess << 0,0,0,0; //center x,y,z and radius
+    initial_guess << 0,0,0,1; //center x,y,z and radius
     
+    //params to be optimized
+    Eigen::Vector4d x_opt(initial_guess); 
     
     //required inits for ceres
     google::InitGoogleLogging(argv[0]);
@@ -77,11 +79,13 @@ int main(int argc, char** argv)
     Eigen::Vector3d noise; 
     for (unsigned int ii=0; ii<np; ii++)
     {
-        q_rnd.vec() << rnd_uniform(rnd_gen), rnd_uniform(rnd_gen), rnd_uniform(rnd_gen); 
-        q_rnd.w() = sqrt( 1 - q_rnd.x()*q_rnd.x() + q_rnd.y()*q_rnd.y() + q_rnd.z()*q_rnd.z() ); 
-        m_rnd = q_rnd.toRotationMatrix(); 
-        v_rnd = m_rnd.block<3,1>(0,0); //first column is the X vector of the frame
-        points.block<3,1>(0,ii) = center + radius*v_rnd; 
+        //q_rnd.vec() << rnd_uniform(rnd_gen), rnd_uniform(rnd_gen), rnd_uniform(rnd_gen); 
+        //q_rnd.w() = sqrt( 1 - q_rnd.x()*q_rnd.x() - q_rnd.y()*q_rnd.y() - q_rnd.z()*q_rnd.z() ); 
+        //m_rnd = q_rnd.toRotationMatrix(); 
+        //v_rnd = m_rnd.block<3,1>(0,0); //first column is the X vector of the frame
+        v_rnd << rnd_uniform(rnd_gen)-0.5, rnd_uniform(rnd_gen)-0.5, rnd_uniform(rnd_gen)-0.5;
+        v_rnd.normalize(); 
+        points.block<3,1>(0,ii) = center + v_rnd*radius;
     }
     
     //add normal noise to points
@@ -100,7 +104,6 @@ int main(int argc, char** argv)
         }
     }
     
-    
 //***************************************************************
 
 //*************** CERES PROBLEM *********************************
@@ -113,11 +116,13 @@ int main(int argc, char** argv)
     {
         problem.AddResidualBlock( new ceres::AutoDiffCostFunction<SphereConstraint, 1, 4>( 
                                                     new SphereConstraint(points.block<3,1>(0,ii)) ),
-                                                    NULL, initial_guess.data() );    
+//                                                     NULL, x_opt.data() );
+                                                    new ceres::CauchyLoss(0.5), x_opt.data() );    
     }
     
     //solve: estimate sphere parameters
     ceres::Solver::Options options;
+    options.minimizer_type = ceres::TRUST_REGION;
     options.max_num_iterations = 25;
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = true;
@@ -126,7 +131,7 @@ int main(int argc, char** argv)
 
     //print results
     std::cout << summary.BriefReport() << std::endl;
-    std::cout << "x-opt : " << initial_guess.transpose() << std::endl;
+    std::cout << "x-opt : " << x_opt.transpose() << std::endl;
     
     //exit
     return 0;
