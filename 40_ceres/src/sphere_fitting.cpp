@@ -33,13 +33,13 @@ class SphereConstraint
             //
         }
         
-        template <typename T> bool operator()(const T* const x, T* residual) const 
+        template <typename T> bool operator()(const T* const _xc, const T* const _xr, T* _residual) const 
         {
             //sphere equation (x-cx)^2+(y-cy)^2+(z-cz)^2 = R^2
-            residual[0] = (T(point_.x())-x[0])*(T(point_.x())-x[0]) +
-                          (T(point_.y())-x[1])*(T(point_.y())-x[1]) +
-                          (T(point_.z())-x[2])*(T(point_.z())-x[2]) -
-                          x[3]*x[3];
+            _residual[0] = (T(point_.x())-_xc[0])*(T(point_.x())-_xc[0]) +
+                           (T(point_.y())-_xc[1])*(T(point_.y())-_xc[1]) +
+                           (T(point_.z())-_xc[2])*(T(point_.z())-_xc[2]) -
+                           _xr[0]*_xr[0];
             return true;
         }
 };
@@ -53,13 +53,15 @@ int main(int argc, char** argv)
     Eigen::Vector3d center; 
     center  << 5,-6,7; 
     double radius = 3.7; 
-    double noise_stddev = 0.2; 
+    double noise_stddev = 0.1; 
     double outlier_ratio = 0.05; 
-    Eigen::Vector4d initial_guess; 
-    initial_guess << 0,0,0,1; //center x,y,z and radius
+    Eigen::Vector3d initial_center; 
+    initial_center << 0,0,0; //initial guess for the center
+    double initial_radius = 1; //initial guess for the radius
     
     //params to be optimized
-    Eigen::Vector4d x_opt(initial_guess); 
+    Eigen::Vector3d x_opt_center(initial_center);
+    double x_opt_radius(initial_radius); 
     
     //required inits for ceres
     google::InitGoogleLogging(argv[0]);
@@ -114,11 +116,15 @@ int main(int argc, char** argv)
     //Add constraints to the problem
     for (unsigned int ii=0; ii<np; ii++)
     {
-        problem.AddResidualBlock( new ceres::AutoDiffCostFunction<SphereConstraint, 1, 4>( 
+        problem.AddResidualBlock( new ceres::AutoDiffCostFunction<SphereConstraint, 1, 3,1>( 
                                                     new SphereConstraint(points.block<3,1>(0,ii)) ),
 //                                                     NULL, x_opt.data() );
-                                                    new ceres::CauchyLoss(0.5), x_opt.data() );    
+                                                    new ceres::CauchyLoss(0.5), 
+                                                    x_opt_center.data(), &x_opt_radius );    
     }
+    
+    //set bounds
+    problem.SetParameterLowerBound(&x_opt_radius,0,1e-3); 
     
     //solve: estimate sphere parameters
     ceres::Solver::Options options;
@@ -131,7 +137,8 @@ int main(int argc, char** argv)
 
     //print results
     std::cout << summary.BriefReport() << std::endl;
-    std::cout << "x-opt : " << x_opt.transpose() << std::endl;
+    std::cout << "x_opt_center : " << x_opt_center.transpose() << std::endl;
+    std::cout << "x_opt_radius : " << x_opt_radius << std::endl;
     
     //exit
     return 0;
