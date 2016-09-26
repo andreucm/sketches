@@ -13,22 +13,23 @@
 #include <eigen3/Eigen/Geometry>
 
 
+enum diffType {AUTOMATIC=1, NUMERIC};
 
-//class holding a point measurement and definig a cost function as a templated const operator ()
-class SphereConstraint
+//class holding a point measurement and definig an Auto diff cost function as a templated const operator ()
+class SphereConstraintAD
 {
     private:
         //point measurement
         Eigen::Vector3d point_; 
     
     public: 
-        SphereConstraint(const Eigen::Vector3d & _point) :
+        SphereConstraintAD(const Eigen::Vector3d & _point) :
             point_(_point)
         {
-            
+            //
         }
         
-        ~SphereConstraint()
+        ~SphereConstraintAD()
         {
             //
         }
@@ -44,6 +45,37 @@ class SphereConstraint
         }
 };
 
+//class holding a point measurement and definig an Auto diff cost function as a templated const operator ()
+class SphereConstraintND
+{
+    private:
+        //point measurement
+        Eigen::Vector3d point_; 
+    
+    public: 
+        SphereConstraintND(const Eigen::Vector3d & _point) :
+            point_(_point)
+        {
+            //
+        }
+        
+        ~SphereConstraintND()
+        {
+            //
+        }
+        
+        bool operator()(const double* const _xc, const double* const _xr, double* _residual) const 
+        {
+            //sphere equation (x-cx)^2+(y-cy)^2+(z-cz)^2 = R^2
+            _residual[0] = (point_.x()-_xc[0])*(point_.x()-_xc[0]) +
+                           (point_.y()-_xc[1])*(point_.y()-_xc[1]) +
+                           (point_.z()-_xc[2])*(point_.z()-_xc[2]) -
+                           _xr[0]*_xr[0];
+            return true;
+        }
+};
+
+
 //main 
 int main(int argc, char** argv) 
 {
@@ -58,6 +90,9 @@ int main(int argc, char** argv)
     Eigen::Vector3d initial_center; 
     initial_center << 0,0,0; //initial guess for the center
     double initial_radius = 1; //initial guess for the radius
+    bool use_loss_function = true; 
+    diffType diff_type = AUTOMATIC; //AUTOMATIC or NUMERIC
+    
     
     //params to be optimized
     Eigen::Vector3d x_opt_center(initial_center);
@@ -75,16 +110,10 @@ int main(int argc, char** argv)
     std::normal_distribution<double> rnd_normal(0.,noise_stddev);    
     Eigen::MatrixXd points;
     points.resize(3,np);
-    Eigen::Quaterniond q_rnd;
-    Eigen::Matrix3d m_rnd; 
     Eigen::Vector3d v_rnd;
     Eigen::Vector3d noise; 
     for (unsigned int ii=0; ii<np; ii++)
     {
-        //q_rnd.vec() << rnd_uniform(rnd_gen), rnd_uniform(rnd_gen), rnd_uniform(rnd_gen); 
-        //q_rnd.w() = sqrt( 1 - q_rnd.x()*q_rnd.x() - q_rnd.y()*q_rnd.y() - q_rnd.z()*q_rnd.z() ); 
-        //m_rnd = q_rnd.toRotationMatrix(); 
-        //v_rnd = m_rnd.block<3,1>(0,0); //first column is the X vector of the frame
         v_rnd << rnd_uniform(rnd_gen)-0.5, rnd_uniform(rnd_gen)-0.5, rnd_uniform(rnd_gen)-0.5;
         v_rnd.normalize(); 
         points.block<3,1>(0,ii) = center + v_rnd*radius;
@@ -113,14 +142,43 @@ int main(int argc, char** argv)
     // Declare the ceres problem.
     ceres::Problem problem;
 
-    //Add constraints to the problem
-    for (unsigned int ii=0; ii<np; ii++)
+    switch (diff_type)
     {
-        problem.AddResidualBlock( new ceres::AutoDiffCostFunction<SphereConstraint, 1, 3,1>( 
-                                                    new SphereConstraint(points.block<3,1>(0,ii)) ),
-//                                                     NULL, x_opt.data() );
-                                                    new ceres::CauchyLoss(0.5), 
-                                                    x_opt_center.data(), &x_opt_radius );    
+        //Add constraints to the problem, according user params: use_loss_function and diff_type
+        case AUTOMATIC:
+            if ( use_loss_function )
+            {
+                for (unsigned int ii=0; ii<np; ii++)
+                {
+                    problem.AddResidualBlock(
+                        new ceres::AutoDiffCostFunction<SphereConstraintAD,1,3,1>(new SphereConstraintAD(points.block<3,1>(0,ii))),
+                        new ceres::CauchyLoss(0.5), 
+                        x_opt_center.data(), &x_opt_radius );    
+                }
+            }
+            else
+            {
+                for (unsigned int ii=0; ii<np; ii++)
+                {
+                    problem.AddResidualBlock( 
+                        new ceres::AutoDiffCostFunction<SphereConstraintAD,1,3,1>(new SphereConstraintAD(points.block<3,1>(0,ii))),
+                        NULL, 
+                        x_opt_center.data(), &x_opt_radius );    
+                }   
+            }
+            break; 
+            
+        case NUMERIC:
+            for (unsigned int ii=0; ii<np; ii++)
+            {
+                problem.AddResidualBlock( 
+                    new ceres::NumericDiffCostFunction<SphereConstraintND,ceres::CENTRAL,1,3,1>(new SphereConstraintND(points.block<3,1>(0,ii))),
+                    new ceres::CauchyLoss(0.5), 
+                    x_opt_center.data(), &x_opt_radius );    
+            }   
+            break;
+            
+        default: break;
     }
     
     //set bounds
@@ -129,7 +187,7 @@ int main(int argc, char** argv)
     //solve: estimate sphere parameters
     ceres::Solver::Options options;
     options.minimizer_type = ceres::TRUST_REGION;
-    options.max_num_iterations = 25;
+    options.max_num_iterations = 100;
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = true;
     ceres::Solver::Summary summary;
