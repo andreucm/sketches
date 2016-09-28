@@ -45,7 +45,7 @@ class SphereConstraintAD
         }
 };
 
-//class holding a point measurement and definig an Auto diff cost function as a templated const operator ()
+//class holding a point measurement and definig a Numeric diff cost function as a templated const operator ()
 class SphereConstraintND
 {
     private:
