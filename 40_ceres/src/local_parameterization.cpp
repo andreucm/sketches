@@ -12,12 +12,9 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 
-//This sketch wants to find the best orientation of a L-shapped stick that minimizes the distance 
-//between the end of te stick and a set of points.
-//The L-shapped stick is attached to the origin, with 1m link from the origin to the elbow, and 0.1m link from the elbow to the end.
-//Long primary link is along object X-axis, and short secondary link is along object Y-axis
-const double STICK_LONG_LINK_SIZE = 1; 
-const double STICK_SHORT_LINK_SIZE = 0.1; 
+//This sketch wants to find the best orientation of a sensor that sees several points stored in a map
+//points have a unique ID, so data association step is avoided. 
+//The purpose is to play & learn around the Local Parameterization API of Ceres library
 
 //class holding a point constraint and definig an Auto diff cost function as a templated const operator ()
 class pointConstraint
@@ -29,8 +26,9 @@ class pointConstraint
         std::vector<Eigen::Vector3d> *map_; // a set of points wrt global frame
     
     public: 
-        pointConstraint(const Eigen::Vector3d & _point) :
-            point_(_point)
+        pointConstraint(const Eigen::Vector3d & _point, unsigned int _id) :
+            point_(_point),
+            point_id_(_id)
         {
             //
         }
@@ -42,20 +40,28 @@ class pointConstraint
         
         template <typename T> bool operator()(const T* const _q, T* _residual) const 
         {
+            
             Eigen::Quaternion<T> quat(_q);//constructor from the array data. Storing order in eigen is qi,qj,qk,qr. 
-            Eigen::Vector<T,3,3> matR;
-            Eigen::Vector<T,3,3> point_map; 
+            //Eigen::Quaternion<T> quat = Eigen::Map<const Eigen::Quaternion<T> >(_q); //constructor from a map
+            Eigen::Matrix<T,3,3> matR;
+            Eigen::Matrix<T,3,1> point_map; 
             
             //build the rotation matrix from the quaternion
             matR = quat.toRotationMatrix();
             
             //move the locally measured point to the global frame
             point_map = matR*(*point_sensor); 
+            //TODO check if point_map = quat*(*point_sensor); could also work. 
             
             //compute the residual (squared distance) between the measured point in the global frame and its correpsonding map point 
-            _residual = ( T( (*map_)[point_id_].x() ) - point_map.x() )^2 + 
-                        ( T( (*map_)[point_id_].y() ) - point_map.y() )^2 + 
-                        ( T( (*map_)[point_id_].z() ) - point_map.z() )^2 ; 
+            //3D residual case
+            _residual[0] = T( (*map_)[point_id_].x() ) - point_map.x(); 
+            _residual[1] = T( (*map_)[point_id_].y() ) - point_map.y(); 
+            _residual[2] = T( (*map_)[point_id_].z() ) - point_map.z(); 
+//          //1D resiudal case
+//             _residual = ( T( (*map_)[point_id_].x() ) - point_map.x() )^2 + 
+//                         ( T( (*map_)[point_id_].y() ) - point_map.y() )^2 + 
+//                         ( T( (*map_)[point_id_].z() ) - point_map.z() )^2 ; 
 
             //return 
             return true;
@@ -70,13 +76,13 @@ int main(int argc, char** argv)
     unsigned int np = 500; //num of map points
     double map_side = 10; //the map is like a cube of map_side side
     double noise_stddev = 0.1; //noise added to measured points
-    double outlier_ratio = 0.05; //outlier ratio
-    Eigen::Quaterniond true_orientation(1,0,0,0); 
-    Eigen::Quaterniond initial_orientation(1,0,0,0); 
+    double outlier_ratio = 0.0; //outlier ratio
+    Eigen::Quaterniond true_orientation(1,0,0,0); //true oreintation of sensor wrt map
+    Eigen::Quaterniond initial_orientation(1,0,0,0); //initial guess orientation of sensor wrt map 
     bool use_loss_function = true;     
     
     //params to be optimized
-    Eigen::Quaterniond optimized_orientation(initial_orientation); 
+    Eigen::Quaterniond optimized_orientation(initial_orientation); //optimized orientation of sensor wrt map 
     
     //required inits for ceres
     google::InitGoogleLogging(argv[0]);
@@ -87,20 +93,22 @@ int main(int argc, char** argv)
     std::default_random_engine rnd_gen;
     std::uniform_real_distribution<double> rnd_uniform(-0.5*map_side,0.5*map_side);
     std::normal_distribution<double> rnd_normal(0.,noise_stddev);    
-    Eigen::MatrixXd point_map(3,np);
+    Eigen::MatrixXd map_points(3,np);//points in the map, wrt map frame
+    Eigen::MatrixXd measured_points(3,np); //measured points wrt sensor frame
     Eigen::Vector3d noise; 
     
     //generate map points within the cube 
     for (unsigned int ii=0; ii<np; ii++)
     {
-        point_map.block<3,1>(0,ii)  << rnd_uniform(rnd_gen), rnd_uniform(rnd_gen), rnd_uniform(rnd_gen);
+        map_points.block<3,1>(0,ii)  << rnd_uniform(rnd_gen), rnd_uniform(rnd_gen), rnd_uniform(rnd_gen);
     }
     
-    //generate local measurements and add normal noise to them
+    //generate sensor measurements and add normal noise to them
     for (unsigned int ii=0; ii<np; ii++)
     {
+        measured_points = true_orientation.inverse()*map_points.block<3,1>(0,ii); 
         noise << rnd_normal(rnd_gen), rnd_normal(rnd_gen), rnd_normal(rnd_gen); 
-        points.block<3,1>(0,ii) = points.block<3,1>(0,ii) + noise; 
+        measured_points.block<3,1>(0,ii) += noise; 
     }
 
     //create outliers
@@ -108,7 +116,7 @@ int main(int argc, char** argv)
     {
         if ( rnd_uniform(rnd_gen) < outlier_ratio ) //outlier case
         {
-            points.block<3,1>(0,ii) << points.block<3,1>(0,ii)*0.5*rnd_uniform(rnd_gen); 
+            measured_points.block<3,1>(0,ii) << measured_points.block<3,1>(0,ii)*rnd_uniform(rnd_gen); 
         }
     }
     
@@ -118,50 +126,26 @@ int main(int argc, char** argv)
 
     // Declare the ceres problem.
     ceres::Problem problem;
+    
+    //declare a pointer to Eigen-Quaternion parameterization
+    ceres::LocalParameterization *eigen_quaternion_parameterization = new ceres_ext::EigenQuaternionParameterization;
 
-    switch (diff_type)
+    //Add constraints to the problem, according user params: use_loss_function and diff_type
+    for (unsigned int ii=0; ii<np; ii++)
     {
-        //Add constraints to the problem, according user params: use_loss_function and diff_type
-        case AUTOMATIC:
-            if ( use_loss_function )
-            {
-                for (unsigned int ii=0; ii<np; ii++)
-                {
-                    problem.AddResidualBlock(
-                        new ceres::AutoDiffCostFunction<SphereConstraintAD,1,3,1>(new SphereConstraintAD(points.block<3,1>(0,ii))),
-                        new ceres::CauchyLoss(0.5), 
-                        x_opt_center.data(), &x_opt_radius );    
-                }
-            }
-            else
-            {
-                for (unsigned int ii=0; ii<np; ii++)
-                {
-                    problem.AddResidualBlock( 
-                        new ceres::AutoDiffCostFunction<SphereConstraintAD,1,3,1>(new SphereConstraintAD(points.block<3,1>(0,ii))),
-                        NULL, 
-                        x_opt_center.data(), &x_opt_radius );    
-                }   
-            }
-            break; 
-            
-        case NUMERIC:
-            for (unsigned int ii=0; ii<np; ii++)
-            {
-                problem.AddResidualBlock( 
-                    new ceres::NumericDiffCostFunction<SphereConstraintND,ceres::CENTRAL,1,3,1>(new SphereConstraintND(points.block<3,1>(0,ii))),
-                    new ceres::CauchyLoss(0.5), 
-                    x_opt_center.data(), &x_opt_radius );    
-            }   
-            break;
-            
-        default: break;
+        //add a residual block for each constraint
+        problem.AddResidualBlock(
+            new ceres::AutoDiffCostFunction<pointConstraint,3,4>(new pointConstraint(points.block<3,1>(0,ii),ii)),
+            new ceres::CauchyLoss(0.5), 
+            optimized_orientation.data() );    
+        
+        // Apply the parameterization
+        problem.SetParameterization(optimized_orientation.data(), eigen_quaternion_parameterization);
     }
     
-    //set bounds
-    problem.SetParameterLowerBound(&x_opt_radius,0,1e-3); 
     
-    //solve: estimate sphere parameters
+    
+    //solve: estimate rotation
     ceres::Solver::Options options;
     options.minimizer_type = ceres::TRUST_REGION;
     options.max_num_iterations = 100;
