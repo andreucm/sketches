@@ -234,16 +234,16 @@ int main(int argc, char** argv)
    glutCreateWindow (argv[0]);
    init();
    display();
-   sleep(3);
+//    sleep(3);
 
    //glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-   glutInitWindowSize (200, 200);
-   glutInitWindowPosition (300, 300);
-   glutCreateWindow (argv[0]);
-   init();
-   display();
-   usleep(1000000); //1 second
+//    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+//    glutInitWindowSize (200, 200);
+//    glutInitWindowPosition (300, 300);
+//    glutCreateWindow (argv[0]);
+//    init();
+//    display();
+//    usleep(1000000); //1 second
    //glutDisplayFunc(display);
    //glutKeyboardFunc(keyboard);
    //glutMainLoop();
