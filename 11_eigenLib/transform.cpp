@@ -33,5 +33,10 @@ int main(int argc, char *argv[])
     std::cout << "T_s_b: " << T_s_b.matrix() <<std::endl;
     std::cout << "p_b: " << p_b.transpose() <<std::endl;    
     
+//Copy operator
+    Eigen::Transform<double,3,Eigen::Affine> Tx; 
+    Tx = T_s_b; 
+    std::cout << "Tx: " << Tx.matrix() <<std::endl;
+    
     return 0;
 }
