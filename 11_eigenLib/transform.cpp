@@ -34,9 +34,28 @@ int main(int argc, char *argv[])
     std::cout << "p_b: " << p_b.transpose() <<std::endl;    
     
 //Copy operator
-    Eigen::Transform<double,3,Eigen::Affine> Tx; 
-    Tx = T_s_b; 
-    std::cout << "Tx: " << Tx.matrix() <<std::endl;
+    Eigen::Transform<double,3,Eigen::Affine> T1; 
+    T1 = T_s_b; 
+    std::cout << "T1:\n" << T1.matrix() <<std::endl;
     
+//copy constructor    
+    Eigen::Transform<double,3,Eigen::Affine> T2(T1);
+    std::cout << "T2:\n" << T2.matrix() <<std::endl;
+
+//rotate about Z
+    Eigen::Quaterniond qt; 
+    double angle = M_PI/4.;
+    qt.w() = cos(angle/2.); 
+    qt.x() = 0.;
+    qt.y() = 0.;
+    qt.z() = sin(angle/2.);
+    T2 = T2*qt;         
+    std::cout << "T2 rotated:\n" << T2.matrix() <<std::endl;
+    
+//invert
+    Eigen::Transform<double,3,Eigen::Affine> T3(T2.inverse()); 
+    std::cout << "T3=T2 inverted:\n" << T3.matrix() <<std::endl;
+    
+//exit    
     return 0;
 }
