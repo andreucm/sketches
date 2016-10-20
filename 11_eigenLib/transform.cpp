@@ -8,7 +8,8 @@
 
 int main(int argc, char *argv[])
 {
-    Eigen::Transform<double,3,Eigen::Affine> T_s_b; 
+//     Eigen::Transform<double,3,Eigen::Affine> T_s_b;
+    Eigen::Affine3d T_s_b;     
     
 //RAW matrix entry    
     //rotation about Y of alpha, and translation to 1,2,3
