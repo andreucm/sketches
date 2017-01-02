@@ -7,7 +7,6 @@
 //ceres includes
 #include "ceres/ceres.h"
 #include "glog/logging.h"
-#include "ceres_extensions/ceres_extensions.h"
 
 //eigen includes
 #include <eigen3/Eigen/Dense>
@@ -130,7 +129,7 @@ int main(int argc, char** argv)
     ceres::Problem problem;
     
     //declare a pointer to Eigen-Quaternion parameterization
-    ceres::LocalParameterization *eigen_quaternion_parameterization = new ceres_ext::EigenQuaternionParameterization;
+    ceres::LocalParameterization *eigen_quaternion_parameterization = new ceres::EigenQuaternionParameterization;
 
     //Add constraints to the problem, according user params: use_loss_function and diff_type
     for (unsigned int ii=0; ii<np; ii++)
