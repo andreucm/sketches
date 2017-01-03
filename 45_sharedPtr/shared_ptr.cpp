@@ -18,7 +18,7 @@ class Foo
             id_(_id),
             next_ptr_(nullptr)
         {
-            //
+            std::cout << "Constructor with id_: " << id_ << std::endl; 
         }
         
         //destructor
@@ -33,7 +33,8 @@ class Foo
         //set next_ptr_ pointer
         void setNextPtr(std::shared_ptr<Foo> & _next_ptr)
         {
-            next_ptr_.reset(_next_ptr.get()); 
+            //next_ptr_.reset(_next_ptr.get()); 
+            next_ptr_ = _next_ptr;
         }
         
         void resetNextPtr()
@@ -57,7 +58,6 @@ int main()
     std::list<std::shared_ptr<Foo> > foo_list; 
     for (unsigned int ii = 0; ii<10; ii++)
     {
-        //foo_list.push_back( std::make_shared<Foo>(ii) );
         foo_list.push_back( std::shared_ptr<Foo>(new Foo(ii)) );
     }
     
@@ -65,7 +65,6 @@ int main()
     for (auto it = foo_list.begin(); it != foo_list.end(); it++)
     {
         it->get()->print();
-        std::cout << "use_count: " << it->use_count() << std::endl << std::endl; 
     }    
     
     //connect each element of the list to the next one
@@ -84,7 +83,6 @@ int main()
     for (auto it = foo_list.begin(); it != foo_list.end(); it++)
     {
         it->get()->print();
-        std::cout << "use_count: " << it->use_count() << std::endl << std::endl; 
     }
 
 //     //debugging message
