@@ -27,9 +27,11 @@ add_executable(main_jet src/main_jet.cpp)
 add_executable(hello_ceres src/hello_ceres.cpp)
 add_executable(sphere_fitting src/sphere_fitting.cpp)
 add_executable(local_parameterization src/local_parameterization.cpp)
+add_executable(camera_ext_calibration src/camera_ext_calibration.cpp)
 
 # Link
 target_link_libraries(main_jet ${CERES_LIBRARIES})
 target_link_libraries(hello_ceres ${CERES_LIBRARIES})
 target_link_libraries(sphere_fitting ${CERES_LIBRARIES})
 target_link_libraries(local_parameterization ${CERES_LIBRARIES})
+target_link_libraries(camera_ext_calibration ${CERES_LIBRARIES})
