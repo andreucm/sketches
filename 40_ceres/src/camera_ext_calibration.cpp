@@ -15,11 +15,11 @@
 class pointConstraint
 {
     private:
-        unsigned int point_id_; //associates the measured point with its id in the map. Just to avoid data association step. 
+        unsigned int point_id_; //point id
         Eigen::Vector2d point_image_; //the point measured in image coordinates [pixels]
         Eigen::Vector3d point_base_; //the point measured in robot base frame [m]
         Eigen::Matrix3d K_; //intrinsics matrix
-        Eigen::MatrixXd P_; //intrinsics matrix + transform of the camera ([I | 0] in this case)
+        Eigen::MatrixXd P_; //intrinsics matrix * transform of the camera ([I | 0] in this case)
     
     public: 
         pointConstraint(unsigned int _id, 
@@ -32,7 +32,7 @@ class pointConstraint
             K_(_K),
             P_(3,4)
         {
-            //build matrix P_
+            //build matrix P_. The camera frame is the reference frame, so there is no extra rotation/translation
             P_.block<3,3>(0,0) << K_;
             P_.block<3,1>(0,3) << 0, 0, 0;
         }
@@ -42,6 +42,12 @@ class pointConstraint
             //
         }
         
+        /** \brief Cost function
+         * Cost function where: 
+         * \param _p is the translation of the base wrt camera. 3-scalar
+         * \param _q is the rotation of the base wrt camera. Quaternion. 4-scalar 
+         * \param _residual is the 2D returned residual. 
+         **/
         template <typename T> bool operator()(const T* const _p, const T* const _q, T* _residual) const 
         {
             //build the transform. Base pose wrt Camera
@@ -51,17 +57,16 @@ class pointConstraint
             TB_C.translation() << _p[0], _p[1], _p[2]; 
 
             //compute cost
-            Eigen::Matrix<T,4,1> pB;
-            pB << T(point_base_(0)), T(point_base_(1)), T(point_base_(2)), T(1.0);//homogeneous point
-            Eigen::Matrix<T,3,4> P;
-            T a = T(P_(0,0));
+            Eigen::Matrix<T,4,1> pt_B;//T-typed, 3D, homogeneous point wrt base
+            pt_B << T(point_base_(0)), T(point_base_(1)), T(point_base_(2)), T(1.0);
+            Eigen::Matrix<T,3,4> P;//T-typed P_ matrix
             P(0,0) = T(P_(0,0)); P(0,1) = T(P_(0,1)); P(0,2) = T(P_(0,2)); P(0,3) = T(P_(0,3));
             P(1,0) = T(P_(1,0)); P(1,1) = T(P_(1,1)); P(1,2) = T(P_(1,2)); P(1,3) = T(P_(1,3));
             P(2,0) = T(P_(2,0)); P(2,1) = T(P_(2,1)); P(2,2) = T(P_(2,2)); P(2,3) = T(P_(2,3));            
-            Eigen::Matrix<T,3,1> v_aux; 
-            v_aux = P*TB_C.matrix()*pB;
-            _residual[0] = T(point_image_(0)) - v_aux(0)/v_aux(2); 
-            _residual[1] = T(point_image_(1)) - v_aux(1)/v_aux(2); 
+            Eigen::Matrix<T,3,1> pt_projected;//T-typed projected pt_B point to image plane. Product P*TB_C*pt_B 
+            pt_projected = P*TB_C.matrix()*pt_B;
+            _residual[0] = T(point_image_(0)) - pt_projected(0)/pt_projected(2); 
+            _residual[1] = T(point_image_(1)) - pt_projected(1)/pt_projected(2); 
             
             //return 
             return true;
@@ -147,7 +152,7 @@ int main(int argc, char** argv)
 
     //solve: estimate rotation
     ceres::Solver::Options options;
-    options.minimizer_type = ceres::TRUST_REGION;
+    options.minimizer_type = ceres::TRUST_REGION; //ceres::LINE_SEARCH
     options.linear_solver_type = ceres::DENSE_QR;    
     options.max_num_iterations = 100;
     options.function_tolerance = 1e-9;
