@@ -150,7 +150,7 @@ int main(int argc, char** argv)
     // Apply the parameterization over the 4 quaternion parameters
     problem.SetParameterization(optimized_orientation.coeffs().data(), eigen_quaternion_parameterization);
 
-    //solve: estimate rotation
+    //solve: estimate transform of base wrt camera
     ceres::Solver::Options options;
     options.minimizer_type = ceres::TRUST_REGION; //ceres::LINE_SEARCH
     options.linear_solver_type = ceres::DENSE_QR;    
