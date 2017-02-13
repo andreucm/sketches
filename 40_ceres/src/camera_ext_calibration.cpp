@@ -132,9 +132,6 @@ int main(int argc, char** argv)
     // Declare the ceres problem.
     ceres::Problem problem;
     
-    //declare a pointer to Eigen-Quaternion parameterization
-    ceres::LocalParameterization *eigen_quaternion_parameterization = new ceres::EigenQuaternionParameterization;
-
     //Add constraints to the problem
     for (unsigned int ii=0; ii<np; ii++)
     {
@@ -148,6 +145,7 @@ int main(int argc, char** argv)
     }
 
     // Apply the parameterization over the 4 quaternion parameters
+    ceres::LocalParameterization *eigen_quaternion_parameterization = new ceres::EigenQuaternionParameterization;    
     problem.SetParameterization(optimized_orientation.coeffs().data(), eigen_quaternion_parameterization);
 
     //solve: estimate transform of base wrt camera

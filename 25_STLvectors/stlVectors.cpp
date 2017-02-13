@@ -72,6 +72,17 @@ int main()
             cout << set.at(ii).getValue() << "; ";
       }
       cout << endl;
+      
+      //**************
+      double da[] = {1.1,-2.2,3.3,-4.4};
+      vector<double> dv(da,da+4);
+      cout << "dv = ";
+      for (ii=0; ii<dv.size(); ii++)
+      {
+            cout << dv[ii] << ", ";
+      }
+      cout << endl;
+      
         
 	return 0;
 }
