@@ -109,6 +109,10 @@ int main(int argc, char *argv[])
             md.setZero(1,3);
             cout << md << endl;
             break; 
+        
+        case 5: 
+            uu << 1, 0, -4.2;
+            std::cout << uu.block<2,1>(1,0) << std::endl; 
 
         default:
             std::cout << std::endl << "Unknown Test Id. EXIT" << std::endl;

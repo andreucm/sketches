@@ -56,6 +56,12 @@ int main(int argc, char *argv[])
 //invert
     Eigen::Transform<double,3,Eigen::Affine> T3(T2.inverse()); 
     std::cout << "T3=T2 inverted:\n" << T3.matrix() <<std::endl;
+
+//quaternion from matrix    
+    Eigen::Matrix3d mat2; 
+    mat2 << -1,0,0,0,1,0,0,0,-1;
+    Eigen::Quaterniond qt2(mat2);
+    std::cout << "qt2: " << qt2.coeffs().transpose() <<std::endl;    
     
 //exit    
     return 0;
