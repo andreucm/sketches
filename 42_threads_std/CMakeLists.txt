@@ -31,3 +31,10 @@ add_executable(icp_example
 target_link_libraries(icp_example
 	${CMAKE_THREAD_LIBS_INIT}
 )
+
+add_executable(icp_example_class
+	icp_example_class.cpp
+)
+target_link_libraries(icp_example_class
+	${CMAKE_THREAD_LIBS_INIT}
+)
