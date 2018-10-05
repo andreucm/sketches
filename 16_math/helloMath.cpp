@@ -15,13 +15,13 @@ int main()
       vector<bool> myB(8,true);
 	bool myB2[8];
       unsigned int st, mask, ii;
-	
+
 	//module
 	a1 = 12651721;
 	mm = 2;
 	a2 = a1%mm;
 	cout << a1 << " module " << mm << " = " << a2 << endl;
-	
+
 	//int, ceil, floor and round
 	cout << "3/2 = " << 3/2 << endl;
 	cout << "3./2. = " << 3./2. << endl;
@@ -42,19 +42,19 @@ int main()
 	cout << "sqrt(2) = " << M_SQRT2 << endl;
 	cout << "fabs(-1.345) = " << fabs(-1.345) << endl;
 	cout << "exp(1) = " << exp(1) << endl;
-	cout << "pow(3,2) = " << pow(3,2) << endl;	
+	cout << "pow(3,2) = " << pow(3,2) << endl;
       cout << "copysign ( 10.0,-1.0) = " << copysign( 10.0,-1.0) << endl;
-	
+
 	//
 	idx = 1;
 	cout << "idx = " << idx << endl;
 	cout << "!idx = " << !idx << endl;
 	cout << "(int)(rand()*255) = " << (int)(rand()*255.0/RAND_MAX) << endl;
 	cout << "sizeof(double): " <<  sizeof(x1) << endl;
-      
+
       //bitwise operations
       unsigned short aa, bb;
-      
+
       //setting single bits
       aa = 0x01 | 0x02;
       bb = 0x01 & 0x03;
@@ -64,23 +64,32 @@ int main()
       std::cout << "bb: " << bb << std::endl;
       if (aa & 0x01) std::cout << "aa has 0x01" << std::endl;
       if (aa & 0x04) std::cout << "aa has 0x04" << std::endl;
-	
+
       //resetting a single bit
-      aa &= (0xffff & ~(0x02) );
+	  aa &=  ~(0x02);
       std::cout << "aa: " << aa << std::endl;
-      
-      //atan 
+
+      //atan
       double ang = atan2( 0 , -1 );
       std::cout << "ang: " << ang << std::endl;
-      
+
       //shifting
       unsigned char vc[4];
-      vc[0] = 0xa0; vc[1] = 0xb1; vc[2] = 0xc2; vc[3] = 0xd3;  
-      unsigned int ui; 
+      vc[0] = 0xa0; vc[1] = 0xb1; vc[2] = 0xc2; vc[3] = 0xd3;
+      unsigned int ui;
       ui = vc[3] << 24 | vc[2] << 16 | vc[1] << 8 | vc[0];
       cout << hex << ui << dec << endl;
-      
-      
+
+	  //checking with if:
+	  unsigned short int st1 = 0x00ff;
+	  if (st1 & 0x0008) std::cout << "bit 3 of st1 is 1" << std::endl;
+	  else std::cout << "bit 3 of st1 is 0" << std::endl;
+	  unsigned short int st2 = 0x00f7;
+	  if (st2 & 0x0008) std::cout << "bit 3 of st2 is 1" << std::endl;
+	  else std::cout << "bit 3 of st2 is 0" << std::endl;
+
+	  //check sign
+	  std::cout << "std::sign(-3.9): " << fabs(-3.9)/-3.9 << std::endl;
+
 	return 0;
 }
-
