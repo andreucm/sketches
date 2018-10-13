@@ -11,24 +11,24 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 
-class CERES_EXPORT AngleParameterization : public ceres::LocalParameterization
+class CERES_EXPORT Direction2dParameterization : public ceres::LocalParameterization
 {
 	public:
-		virtual ~AngleParameterization() {}
+		virtual ~Direction2dParameterization() {}
 
   		virtual bool Plus(const double* _x, const double* _delta, double* _x_plus_delta) const
 		{
-			double arctg = atan2(_x[1],_x[0]);
-			_x_plus_delta[0] = cos( arctg + _delta[0] );
-			_x_plus_delta[1] = sin( arctg + _delta[0] );
+			double angle = atan2(_x[1],_x[0]);
+			_x_plus_delta[0] = cos( angle + _delta[0] );
+			_x_plus_delta[1] = sin( angle + _delta[0] );
 			return true;
 		}
 
 		virtual bool ComputeJacobian(const double* _x, double* _jacobian) const
 		{
-			double arctg = atan2(_x[1],_x[0]);
-			_jacobian[0] = -sin( arctg );
-			_jacobian[1] = cos( arctg );
+			double angle = atan2(_x[1],_x[0]);
+			_jacobian[0] = -sin( angle );
+			_jacobian[1] = cos( angle );
 			return true;
 		}
 
@@ -46,7 +46,7 @@ class PointConstraint
 		PointConstraint(const Eigen::Vector2d & _point) :
 			point_(_point)
 		{
-			point_.normalize(); //keep only the direction
+			point_.normalize(); //keep only the direction, in case it was not normalized
 		}
 
 		~PointConstraint()
@@ -57,10 +57,12 @@ class PointConstraint
 		template <typename T> bool operator()(const T* const _a, T* _residual) const
         {
 			Eigen::Matrix<T,2,1> pt;
-			Eigen::Matrix<T,2,1> v_angle;
+			Eigen::Matrix<T,2,1> direction;
 			pt << T(point_(0)), T(point_(1));
-			v_angle << _a[0], _a[1];
-			_residual[0] = (pt.dot(v_angle) - T(1.0));
+			direction << _a[0], _a[1];
+			//_residual[0] = (direction.dot(pt) - T(1.0)); //results in a bias at the final optimized value
+			_residual[0] = atan2(pt(1),pt(0)) - atan2(direction(1),direction(0)); //it works, but could be better to do not use arctan here, since it behave very differently wrt the angle
+			_residual[0] = atan2(pt(1),pt(0)) - atan2(direction(1),direction(0));
 			return true;
 		}
 };
@@ -69,12 +71,12 @@ int main(int argc, char** argv)
 {
     //user arguments.
     unsigned int np = 500; //num of points
-    double angle_true = 45*M_PI/180.0; //the true angle from which points are generated [rad]
+    double angle_true = 30*M_PI/180.0; //the true angle from which points are generated [rad]
     double angle_noise_stddev = 0.1; //noise stddev in angle [rad]
 	double angle_init_guess = 60.0*M_PI/180.0; //[rad]
 
     // direction vector to be optimized, initialized with init guess
-	Eigen::Vector2d v_angle_optimized(cos(angle_init_guess), sin(angle_init_guess));
+	Eigen::Vector2d direction_optimized(cos(angle_init_guess), sin(angle_init_guess));
 
     //required inits for ceres
     google::InitGoogleLogging(argv[0]);
@@ -86,8 +88,7 @@ int main(int argc, char** argv)
     std::normal_distribution<double> rnd_normal(0.,angle_noise_stddev);
     Eigen::MatrixXd points(2,np);
     Eigen::Vector3d noise;
-	double cos_angle = cos(angle_true);
-	double sin_angle = sin(angle_true);
+	double cos_angle, sin_angle;
     for (unsigned int ii=0; ii<np; ii++)
     {
 		cos_angle = cos(angle_true + rnd_normal(rnd_generator));
@@ -97,15 +98,15 @@ int main(int argc, char** argv)
 
 	//*************** CERES PROBLEM *********************************
     ceres::Problem problem; // Declare the ceres problem.
-    ceres::LocalParameterization *angle_parameterization = new AngleParameterization;
+    ceres::LocalParameterization *angle_parameterization = new Direction2dParameterization;
     for (unsigned int ii=0; ii<np; ii++) //Add constraints to the problem. (add a residual block for each constraint)
     {
         problem.AddResidualBlock(
             new ceres::AutoDiffCostFunction<PointConstraint,1,2>(new PointConstraint(points.block<2,1>(0,ii))),
-            new ceres::CauchyLoss(0.5),
-            v_angle_optimized.data() );
+            nullptr,
+            direction_optimized.data() );
     }
-    problem.SetParameterization(v_angle_optimized.data(), angle_parameterization); // Apply the angle parameterization over the 2 angle parameters
+    problem.SetParameterization(direction_optimized.data(), angle_parameterization); // Apply the angle parameterization over the 2 angle parameters
     ceres::Solver::Options options;
     options.minimizer_type = ceres::TRUST_REGION;
     options.linear_solver_type = ceres::DENSE_QR;
@@ -120,22 +121,21 @@ int main(int argc, char** argv)
     // ****************** PRINT RESULTS **************************
     std::cout << summary.FullReport() << std::endl;
     std::cout << "angle_true: " << angle_true*180.0/M_PI << std::endl;
-	double angle_optimized = atan2(v_angle_optimized(1),v_angle_optimized(0));
+	double angle_optimized = atan2(direction_optimized(1),direction_optimized(0));
     std::cout << "angle_optimized : " << angle_optimized*180.0/M_PI << std::endl;
 
-	//check computing the sum
-	Eigen::Vector2d direction;
+	//check computing the mean estimator
+	Eigen::Vector2d direction_check;
 	double dx(0), dy(0);
 	for (unsigned int ii=0; ii<np; ii++)
 	{
-		direction << points.block<2,1>(0,ii);
-		direction.normalize();
-		dx += direction(0);
-		dy += direction(1);
+		direction_check << points.block<2,1>(0,ii);
+		direction_check.normalize();
+		dx += direction_check(0);
+		dy += direction_check(1);
 	}
 	double angle_check = atan2(dy,dx);
 	std::cout << "angle_check : " << angle_check*180.0/M_PI << std::endl;
-
 
     //exit
     return 0;
