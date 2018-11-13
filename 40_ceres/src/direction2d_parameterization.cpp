@@ -60,9 +60,7 @@ class PointConstraint
 			Eigen::Matrix<T,2,1> direction;
 			pt << T(point_(0)), T(point_(1));
 			direction << _a[0], _a[1];
-			//_residual[0] = (direction.dot(pt) - T(1.0)); //results in a bias at the final optimized value
-			_residual[0] = atan2(pt(1),pt(0)) - atan2(direction(1),direction(0)); //it works, but could be better to do not use arctan here, since it behave very differently wrt the angle
-			_residual[0] = atan2(pt(1),pt(0)) - atan2(direction(1),direction(0));
+			_residual[0] = (direction.dot(pt) - T(1.0));
 			return true;
 		}
 };
@@ -73,7 +71,7 @@ int main(int argc, char** argv)
     unsigned int np = 500; //num of points
     double angle_true = 30*M_PI/180.0; //the true angle from which points are generated [rad]
     double angle_noise_stddev = 0.1; //noise stddev in angle [rad]
-	double angle_init_guess = 60.0*M_PI/180.0; //[rad]
+	double angle_init_guess = 160.0*M_PI/180.0; //[rad]
 
     // direction vector to be optimized, initialized with init guess
 	Eigen::Vector2d direction_optimized(cos(angle_init_guess), sin(angle_init_guess));
@@ -87,18 +85,15 @@ int main(int argc, char** argv)
 	rnd_generator.seed(tp.time_since_epoch().count());
     std::normal_distribution<double> rnd_normal(0.,angle_noise_stddev);
     Eigen::MatrixXd points(2,np);
-    Eigen::Vector3d noise;
-	double cos_angle, sin_angle;
+	double angle_noise;
     for (unsigned int ii=0; ii<np; ii++)
     {
-		cos_angle = cos(angle_true + rnd_normal(rnd_generator));
-		sin_angle = sin(angle_true + rnd_normal(rnd_generator));
-        points.block<2,1>(0,ii)  << cos_angle, sin_angle;
+		angle_noise = angle_true + rnd_normal(rnd_generator);
+        points.block<2,1>(0,ii)  << cos(angle_noise), sin(angle_noise);
     }
 
 	//*************** CERES PROBLEM *********************************
     ceres::Problem problem; // Declare the ceres problem.
-    ceres::LocalParameterization *angle_parameterization = new Direction2dParameterization;
     for (unsigned int ii=0; ii<np; ii++) //Add constraints to the problem. (add a residual block for each constraint)
     {
         problem.AddResidualBlock(
@@ -106,7 +101,7 @@ int main(int argc, char** argv)
             nullptr,
             direction_optimized.data() );
     }
-    problem.SetParameterization(direction_optimized.data(), angle_parameterization); // Apply the angle parameterization over the 2 angle parameters
+    problem.SetParameterization(direction_optimized.data(), new Direction2dParameterization); // Apply the angle parameterization over the 2 angle parameters
     ceres::Solver::Options options;
     options.minimizer_type = ceres::TRUST_REGION;
     options.linear_solver_type = ceres::DENSE_QR;
@@ -124,7 +119,7 @@ int main(int argc, char** argv)
 	double angle_optimized = atan2(direction_optimized(1),direction_optimized(0));
     std::cout << "angle_optimized : " << angle_optimized*180.0/M_PI << std::endl;
 
-	//check computing the mean estimator
+	//check the results by computing the mean estimator
 	Eigen::Vector2d direction_check;
 	double dx(0), dy(0);
 	for (unsigned int ii=0; ii<np; ii++)
