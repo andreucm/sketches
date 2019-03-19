@@ -14,3 +14,4 @@ endif()
 #build example
 ADD_EXECUTABLE(shared_ptr shared_ptr.cpp)
 ADD_EXECUTABLE(shared_ptr_2 shared_ptr_2.cpp)
+ADD_EXECUTABLE(shared_ptr_3 shared_ptr_3.cpp)
