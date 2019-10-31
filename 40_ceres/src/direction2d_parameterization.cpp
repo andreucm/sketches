@@ -118,6 +118,7 @@ int main(int argc, char** argv)
     std::cout << "angle_true: " << angle_true*180.0/M_PI << std::endl;
 	double angle_optimized = atan2(direction_optimized(1),direction_optimized(0));
     std::cout << "angle_optimized : " << angle_optimized*180.0/M_PI << std::endl;
+	std::cout << "direction norm : " << direction_optimized.norm() << std::endl;
 
 	//check the results by computing the mean estimator
 	Eigen::Vector2d direction_check;
