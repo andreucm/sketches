@@ -9,44 +9,46 @@ using namespace std;
 int main()
 {
 	//declares three pointers to objects of the class shape
-	shape *s1; //s1 is a pointer to a shape type
-	square *s2; //s2 is a pointer to a square type
-	triangle *s3; //s3 is a pointer to a triangle type
-	circle *s4; //s4 is a pointer to a circle type
-	
+	shape *shape_ptr; //shape_ptr is a pointer to a shape type
+	square *square_ptr; //square_ptr is a pointer to a square type
+	triangle *triangle_ptr; //triangle_ptr is a pointer to a triangle type
+	circle *circle_ptr; //circle_ptr is a pointer to a circle type
+
 	//prints a header
 	cout << endl << "WELCOME TO C++ INHERITANCE ****************" << endl << endl;
 
 	//allocates memory calling constructors
-	s1 = new square("square1", 2); //s1 will be a square of side 2
-	s2 = new square("square2", 3); //s2 will be a square of side 3	
-	s3 = new triangle("triangle1", 2, 4); //s3 wilb a triangle 2x4
-	s4 = new circle("circleA",2);
-	
-	//do something
-	cout << "Area of "; s1->printName(); cout << " is: " << s1->computeArea() << endl;
-	cout << "Area of "; s2->printName(); cout << " is: " << s2->computeArea() << endl;
-	cout << "Area of "; s3->printName(); cout << " is: " << s3->computeArea() << endl;
-	cout << "Area of "; s4->printName(); cout << " is: " << s4->computeArea() << endl;
-	
-	//draw shapes
-	s1->draw();
-	s3->draw();
-	s4->draw();
-	cout << "********************************************" << endl;
-		
-	//calls destructor just for s1
-	delete s1;
-	
-	//since s1 was a "generic" pointer to "shape" type, it can be used to construct another kind of shape
-	s1 = new triangle("triangle2",3,3);
-	cout << "Area of "; s1->printName(); cout << " is: " << s1->computeArea() << endl;
+	shape_ptr = new square("square1", 2); //shape_ptr will be a square of side 2
+	square_ptr = new square("square2", 3); //square_ptr will be a square of side 3
+	triangle_ptr = new triangle("triangle1", 2, 4); //triangle_ptr wilb a triangle 2x4
+	circle_ptr = new circle("circleA",2);
 
-	//Finally call all destructors -> free reserved memory space 
-	delete s1;
-	delete s2;
-	delete s3;
-	delete s4;
+	//do something
+	cout << "Area of "; shape_ptr->printName(); cout << " is: " << shape_ptr->computeArea() << endl;
+	cout << "Area of "; square_ptr->printName(); cout << " is: " << square_ptr->computeArea() << endl;
+	cout << "Area of "; triangle_ptr->printName(); cout << " is: " << triangle_ptr->computeArea() << endl;
+	cout << "Area of "; circle_ptr->printName(); cout << " is: " << circle_ptr->computeArea() << endl;
+
+	//draw shapes
+	shape_ptr->draw();
+	square_ptr->draw();
+	triangle_ptr->draw();
+	circle_ptr->draw();
+
+	//calls destructor just for shape_ptr
+	delete shape_ptr;
+
+	//since shape_ptr was a "generic" pointer to "shape" type, it can be used to construct another kind of shape
+	shape_ptr = new triangle("triangle2",3,3);
+	cout << "********************************************" << endl;
+	cout << "Area of "; shape_ptr->printName(); cout << " is: " << shape_ptr->computeArea() << endl;
+	shape_ptr->draw();
+
+	//Finally call all destructors -> free reserved memory space
+	delete shape_ptr;
+	delete square_ptr;
+	delete triangle_ptr;
+	delete circle_ptr;
 
 	return 0;
 }
