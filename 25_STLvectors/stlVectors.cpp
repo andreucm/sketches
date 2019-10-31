@@ -6,35 +6,35 @@ using namespace std;
 
 class myClass
 {
-	protected: 
+	protected:
 		double aa;
 	public:
             myClass()
             {
                   aa=0;
             }
-                
+
 		myClass(double value)
 		{
 			aa = value;
 			cout << "End of constructor: aa=" << aa << endl;
 		}
-		
+
 		~myClass()
 		{
 			cout << "End of destructor: aa=" << aa << endl;
 		}
-		
+
 		void setValue(double value)
 		{
 			aa=value;
 		}
-		
+
 		double getValue()
                 {
                         return aa;
                 }
-		
+
 		double by2()
 		{
 			return (2*aa);
@@ -46,23 +46,23 @@ int main()
 	vector<myClass> set;
 	myClass * newMember;
 	int ii;
-	
+
 	for (ii=0; ii<4; ii++)
 	{
 		newMember = new myClass( (double) (ii+1) );
 		//newMember->setValue( (double)ii );
 		set.push_back(*newMember);
 	}
-	
+
 	cout << "Results: ";
 	for (ii=0; ii<set.size(); ii++)
 	{
 		cout << set.at(ii).by2() << "; ";
 	}
 	cout << endl;
-	
-	set.clear();	
-        
+
+	set.clear();
+
       //*************
       set.resize(5);
       set.at(4).setValue(44);
@@ -72,17 +72,25 @@ int main()
             cout << set.at(ii).getValue() << "; ";
       }
       cout << endl;
-      
+
       //**************
       double da[] = {1.1,-2.2,3.3,-4.4};
       vector<double> dv(da,da+4);
       cout << "dv = ";
-      for (ii=0; ii<dv.size(); ii++)
-      {
-            cout << dv[ii] << ", ";
-      }
+      for (ii=0; ii<dv.size(); ii++) cout << dv[ii] << ", ";
+	  cout << std::endl << "dv = ";
+	  for (ii=0; ii<dv.size(); ii++) cout << *(dv.data()+ii) << ", ";
+	  cout << std::endl << "dv@ = ";
+	  for (ii=0; ii<dv.size(); ii++) cout << dv.data()+ii << ", ";
       cout << endl;
-      
-        
+
+	  /*
+	  DOES NOT WORK WITH vector<bool> because it has a specialized version of vector. See http://www.cplusplus.com/reference/vector/vector-bool/
+	  vector<bool> db(5);
+      cout << "db = ";
+	  for (ii=0; ii<db.size(); ii++) cout << (int)*(db.data()+ii) << ", ";
+	  cout << endl;
+	  */
+
 	return 0;
 }
