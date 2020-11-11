@@ -54,34 +54,51 @@ int main()
 	//string exportCmnd = "export ZZZ=':0.0'";
 	//system(exportCmnd.c_str());
 
-      //string to integer
-      aa = "123000";
-      //bool rtV = String2Int(aa,aaInt);
-      //std::cout << rtV << "; " << aaInt << std::endl;
+	//string to integer
+	aa = "123000";
+	//bool rtV = String2Int(aa,aaInt);
+	//std::cout << rtV << "; " << aaInt << std::endl;
 
 
-      std::string s1("hola");
-      std::string s2("hola");
+	std::string s1("hola");
+	std::string s2("hola");
 
-      std::cout << "s1.compare(s2): " << s1.compare(s2) << std::endl;
+	std::cout << "s1.compare(s2): " << s1.compare(s2) << std::endl;
 
-	  std::cout << "s2.compare(s1): " << s2.compare(s1) << std::endl;
-      std::string s3("jpñs");
-      std::cout << "s1.compare(s3): " << s1.compare(s3) << std::endl;
-      std::cout << "s3.compare(s1): " << s3.compare(s1) << std::endl;
+	std::cout << "s2.compare(s1): " << s2.compare(s1) << std::endl;
+	std::string s3("jpñs");
+	std::cout << "s1.compare(s3): " << s1.compare(s3) << std::endl;
+	std::cout << "s3.compare(s1): " << s3.compare(s1) << std::endl;
 
-      s1 = "<orderItem>";
-      s2 = "<orderItem>";
-      std::cout << "s1.compare(s2): " << s1.compare("<orderItem>") << std::endl;
-      std::cout << "s2.compare(s1): " << s2.compare(s1) << std::endl;
+	s1 = "<orderItem>";
+	s2 = "<orderItem>";
+	std::cout << "s1.compare(s2): " << s1.compare("<orderItem>") << std::endl;
+	std::cout << "s2.compare(s1): " << s2.compare(s1) << std::endl;
 
-	  std::string str_1("param1");
-	  str_1.insert(0,"namespace/");
-	  std::cout << "str_1: " << str_1 << std::endl;
+	std::string str_1("param1");
+	str_1.insert(0,"namespace/");
+	std::cout << "str_1: " << str_1 << std::endl;
 
-	  std::string str_2("namespace");
-	  std::cout << "str_2+std::string(\"/param1\"): " << str_2+std::string("/param1") << std::endl;
-	  std::cout << "str_2.append(\"/param1\"): " << str_2.append("/param1") << std::endl;
+	std::string str_2("namespace");
+	std::cout << "str_2+std::string(\"/param1\"): " << str_2+std::string("/param1") << std::endl;
+	std::cout << "str_2.append(\"/param1\"): " << str_2.append("/param1") << std::endl;
+
+	std::string str_3("tandem_two_base_2_flange");
+	str_3.erase(24,6);
+	std::cout << str_3 << std::endl;
+	str_3.erase(24,6);
+	std::cout << str_3 << std::endl;
+
+	std::string str_4;
+	str_4.push_back(':');
+	str_4.push_back('8');
+	str_4.push_back(0x39);
+	std::cout << str_4 << std::endl;
+	std::cout << str_4.front() << std::endl;
+
+	std::string str_5("0400000");
+	std::cout << str_5.substr(1,str_5.size()-1) << std::endl; 
+
 
 	return 0;
 }

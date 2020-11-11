@@ -37,7 +37,8 @@ int main()
 
 	// Filling server information
 	server_address.sin_family = AF_INET; // IPv4
-	server_address.sin_addr.s_addr = INADDR_ANY;
+	//server_address.sin_addr.s_addr = INADDR_ANY;
+	inet_aton("63.161.169.137", &server_address.sin_addr);
 	server_address.sin_port = htons(PORT);
 
 	// Bind the socket with the server address

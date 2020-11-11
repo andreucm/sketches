@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -92,5 +93,19 @@ int main()
 	  cout << endl;
 	  */
 
-	return 0;
+	  std::vector<double> dv2;
+	  dv2.push_back(1.1);
+	  dv2.push_back(-2.2);
+	  dv2.push_back(3.3);
+	  dv2.push_back(-4.4);
+	  dv2.push_back(-4.4);
+	  dv2.push_back(5.5);
+	  std::vector<double>::iterator i_dv2;
+	  i_dv2 = std::min_element(dv2.begin(), dv2.end());
+	  std::cout << "std::min_element(): " << *i_dv2 << std::endl;
+	  i_dv2 = std::max_element(dv2.begin(), dv2.end());
+	  std::cout << "std::max_element(): " << *i_dv2 << std::endl;
+
+	  return 0;
+
 }

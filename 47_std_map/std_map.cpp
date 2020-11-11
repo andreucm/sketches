@@ -72,6 +72,22 @@ int main()
 	std::cout << "map[\"pose3\"].product(): " << map["pose3"].product() << std::endl;
 	std::cout << "map[\"pose2\"].getA(): " << map["pose2"].getA() << std::endl;
 
+	std::map<std::string, unsigned int> map_s_ui;
+	map_s_ui["joint1"] = 0;
+	map_s_ui["joint2"] = 1;
+	map_s_ui["joint3"] = 2;
+	std::cout << "map_s_ui: " << std::endl;
+	std::cout << "\t" << map_s_ui["joint1"] << std::endl;
+	std::cout << "\t" << map_s_ui["joint2"] << std::endl;
+	std::cout << "\t" << map_s_ui["joint3"] << std::endl;
+
+	std::map<std::string,bool> map_s_b;
+	map_s_b["label1"] = false;
+	std::cout << "map_s_b[\"label1\"]: " << map_s_b["label1"] << std::endl;
+	map_s_b["label2"] = false;
+	map_s_b["label3"] = true;
+	map_s_b["label1"] = true;
+	std::cout << "map_s_b[\"label1\"]: " << map_s_b["label1"] << std::endl;
 
 	return 0;
 }
